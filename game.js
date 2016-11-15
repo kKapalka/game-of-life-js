@@ -3,8 +3,8 @@ var canvas = document.getElementById('gameCanvas');
 var ctx = canvas.getContext('2d')
 
 // canvas and grid size defaults
-var gridWidth = 140;
-var gridHeight = 70;
+var gridWidth = 130;
+var gridHeight = 60;
 var gridSquareWidth = 10;
 
 canvas.width = gridWidth * gridSquareWidth;
@@ -26,7 +26,7 @@ for (var x = 0; x < gridWidth; x++) {
 
 		var rand = Math.random()*100;
 
-		if (rand > 44) {
+		if (rand > 80) {
 			grid[x][y] = 1;
 		}
 	}
@@ -40,47 +40,34 @@ function life(){
 
 			// counts alive or dead for neighbours
 			var count = countNearby(x,y);
-
-			if(grid[x][y] == 0){
-				if(count == 3){
-					// life is born
-					gridNext[x][y] = 1;
-				}
-			}else{
-				if(count < 2 || count > 3){
-					// underpopulation & overpopulation
-					gridNext[x][y] = 0;
-				}else{
-					gridNext[x][y] = 1;
-				}
-			}
+			
+			//neighbors=3 == cell is alive (born or not)
+			if(count==3) gridNext[x][y]=1;
+				//neighbors=2 == cell stays alive
+				else if(count==2 && grid[x][y]==1) gridNext[x][y]=1;
+				//otherwise is dead
+				else gridNext[x][y]=0;
 		}
 	}
 	// replace old grid with new population grid
-	grid = gridNext;
+	var temp = gridNext;
+	gridNext=grid;
+	grid=temp;
 }
 
 // count grid neighbours
 function countNearby(x,y){
 	var count = 0;
-
-	// count all nearby sqaures
-	counter(x-1,y-1);
-	counter(x-1,y);
-	counter(x-1,y+1);
-	counter(x,y-1);
-	counter(x,y+1);
-	counter(x+1,y-1);
-	counter(x+1,y);
-	counter(x+1,y+1);
-
-	function counter(x,y){
-		// if x and y on the grid
-		if(x > 0 && x < gridWidth && y > 0 && y < gridHeight){
-			if (grid[x][y] == 1) count++;
-		}
-	}
-
+	
+	for(var i=x+gridWidth-1;i<x+gridWidth+2;i++){
+		for(var j=y+gridHeight-1;j<y+gridHeight+2;j++){
+			// iterate through 3x3 square of cells except itself
+			if(i%gridWidth!=x || j%gridHeight!=y){
+				// modulo lets cells loop around the screen
+			  count+=Number(grid[i%gridWidth][j%gridHeight]);
+				}			
+			}		
+		}		
 	// return count value
 	return count;
 }
@@ -121,7 +108,7 @@ function gameLoop() {
     update(dt);
 
     lastTime = now;
-	window.setTimeout(gameLoop, 50);
+	window.setTimeout(gameLoop, 150);
 };
 
 // start game
