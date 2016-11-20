@@ -3,9 +3,9 @@ var canvas = document.getElementById('gameCanvas');
 var ctx=canvas.getContext('2d');
 
 // canvas and grid size defaults
-var gridWidth = 260;
-var gridHeight = 120;
-var gridSquareWidth = 5;
+var gridWidth = 1300;
+var gridHeight = 600;
+var gridSquareWidth = 1;
 
 canvas.width = gridWidth * gridSquareWidth;
 canvas.height = gridHeight * gridSquareWidth;
@@ -14,16 +14,19 @@ canvas.style.height = canvas.height;
 
 var grid = [];
 var gridNext = [];
+var storage=[];
 
 // create default grid array
 // sudo random noise
 
 for (var x = 0; x < gridWidth; x++) {
-	grid[x] = []
-	gridNext[x] = []
+	grid[x] = [];
+	gridNext[x] = [];
+	storage[x]=[];
 	for (var y = 0; y < gridHeight; y++) {
-		grid[x][y] = [];
-		gridNext[x][y] = []
+		grid[x][y] = 0;
+		gridNext[x][y] = 0;
+		storage[x][y]=0;
 
 		var rand = Math.random()*100;
 
@@ -38,11 +41,10 @@ function life(){
 	// touch each grid coord
 	for (var x = 0; x < gridWidth; x++) {
 		for (var y = 0; y < gridHeight; y++) {
-			var count=countNearby(x,y);
-			gridNext[x][y]=(count==3?1:(count==2?grid[x][y]:0));
-			//3 neighbors = alive; 2 neighbors = previous state. Otherwise = dead
+			if(Boolean(grid[x][y])) addNearby(x,y);			
 		}
 	}
+	fillNext();
 	// replace old grid with new population grid
 	var temp = gridNext;
 	gridNext=grid;
@@ -50,16 +52,24 @@ function life(){
 }
 
 // count grid neighbours
-function countNearby(x,y){
+function addNearby(x,y){
 	var i=x+gridWidth-1,j=y+gridHeight-1;
-	return Number(grid[i%gridWidth][j%gridHeight])+
-			 Number(grid[i%gridWidth][y])+
-			 Number(grid[i%gridWidth][(j+2)%gridHeight])+
-			 Number(grid[x][j%gridHeight])+               
-			 Number(grid[x][(j+2)%gridHeight])+
-			 Number(grid[(i+2)%gridWidth][j%gridHeight])+
-			 Number(grid[(i+2)%gridWidth][y])+
-			 Number(grid[(i+2)%gridWidth][(j+2)%gridHeight]);
+	storage[i%gridWidth][j%gridHeight]+=1;
+	storage[i%gridWidth][y]+=1;
+	storage[i%gridWidth][(j+2)%gridHeight]+=1;
+	storage[x][j%gridHeight]+=1;              
+	storage[x][(j+2)%gridHeight]+=1;
+	storage[(i+2)%gridWidth][j%gridHeight]+=1;
+	storage[(i+2)%gridWidth][y]+=1;
+	storage[(i+2)%gridWidth][(j+2)%gridHeight]+=1;
+}
+function fillNext(){
+	for (var x = 0; x < gridWidth; x++) {
+		for (var y = 0; y < gridHeight; y++) {
+			gridNext[x][y]=storage[x][y]==3?1:(storage[x][y]==2?grid[x][y]:0);
+			storage[x][y]=0;
+		}
+	}
 }
 
 
