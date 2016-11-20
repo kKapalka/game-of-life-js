@@ -1,11 +1,11 @@
 // setup canvas
 var canvas = document.getElementById('gameCanvas');
-var ctx = canvas.getContext('2d')
+var ctx=canvas.getContext('2d');
 
 // canvas and grid size defaults
-var gridWidth = 130;
-var gridHeight = 60;
-var gridSquareWidth = 10;
+var gridWidth = 260;
+var gridHeight = 120;
+var gridSquareWidth = 5;
 
 canvas.width = gridWidth * gridSquareWidth;
 canvas.height = gridHeight * gridSquareWidth;
@@ -17,6 +17,7 @@ var gridNext = [];
 
 // create default grid array
 // sudo random noise
+
 for (var x = 0; x < gridWidth; x++) {
 	grid[x] = []
 	gridNext[x] = []
@@ -37,16 +38,9 @@ function life(){
 	// touch each grid coord
 	for (var x = 0; x < gridWidth; x++) {
 		for (var y = 0; y < gridHeight; y++) {
-
-			// counts alive or dead for neighbours
-			var count = countNearby(x,y);
-			
-			//neighbors=3 == cell is alive (born or not)
-			if(count==3) gridNext[x][y]=1;
-				//neighbors=2 == cell stays alive
-				else if(count==2 && grid[x][y]==1) gridNext[x][y]=1;
-				//otherwise is dead
-				else gridNext[x][y]=0;
+			var count=countNearby(x,y);
+			gridNext[x][y]=(count==3?1:(count==2?grid[x][y]:0));
+			//3 neighbors = alive; 2 neighbors = previous state. Otherwise = dead
 		}
 	}
 	// replace old grid with new population grid
@@ -57,19 +51,15 @@ function life(){
 
 // count grid neighbours
 function countNearby(x,y){
-	var count = 0;
-	
-	for(var i=x+gridWidth-1;i<x+gridWidth+2;i++){
-		for(var j=y+gridHeight-1;j<y+gridHeight+2;j++){
-			// iterate through 3x3 square of cells except itself
-			if(i%gridWidth!=x || j%gridHeight!=y){
-				// modulo lets cells loop around the screen
-			  count+=Number(grid[i%gridWidth][j%gridHeight]);
-				}			
-			}		
-		}		
-	// return count value
-	return count;
+	var i=x+gridWidth-1,j=y+gridHeight-1;
+	return Number(grid[i%gridWidth][j%gridHeight])+
+			 Number(grid[i%gridWidth][y])+
+			 Number(grid[i%gridWidth][(j+2)%gridHeight])+
+			 Number(grid[x][j%gridHeight])+               
+			 Number(grid[x][(j+2)%gridHeight])+
+			 Number(grid[(i+2)%gridWidth][j%gridHeight])+
+			 Number(grid[(i+2)%gridWidth][y])+
+			 Number(grid[(i+2)%gridWidth][(j+2)%gridHeight]);
 }
 
 
@@ -108,8 +98,9 @@ function gameLoop() {
     update(dt);
 
     lastTime = now;
-	window.setTimeout(gameLoop, 150);
+	window.setTimeout(gameLoop, 1);
 };
+
 
 // start game
 gameLoop();
