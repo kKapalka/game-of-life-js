@@ -13,7 +13,6 @@ canvas.style.width = canvas.width;
 canvas.style.height = canvas.height;
 
 var grid = [];
-var gridNext = [];
 var storage=[];
 
 // create default grid array
@@ -21,18 +20,10 @@ var storage=[];
 
 for (var x = 0; x < gridWidth; x++) {
 	grid[x] = [];
-	gridNext[x] = [];
 	storage[x]=[];
 	for (var y = 0; y < gridHeight; y++) {
-		grid[x][y] = 0;
-		gridNext[x][y] = 0;
-		storage[x][y]=0;
-
-		var rand = Math.random()*100;
-
-		if (rand > 80) {
-			grid[x][y] = 1;
-		}
+		grid[x][y] = Math.round(Math.random()-0.35);
+		storage[x][y]=0;		
 	}
 }
 
@@ -45,13 +36,9 @@ function life(){
 		}
 	}
 	fillNext();
-	// replace old grid with new population grid
-	var temp = gridNext;
-	gridNext=grid;
-	grid=temp;
 }
 
-// count grid neighbours
+// add to the Neighbor storage
 function addNearby(x,y){
 	var i=x+gridWidth-1,j=y+gridHeight-1;
 	storage[i%gridWidth][j%gridHeight]+=1;
@@ -63,10 +50,11 @@ function addNearby(x,y){
 	storage[(i+2)%gridWidth][y]+=1;
 	storage[(i+2)%gridWidth][(j+2)%gridHeight]+=1;
 }
+//Change the current grid according to neighbor count for each cell + refresh the storage
 function fillNext(){
 	for (var x = 0; x < gridWidth; x++) {
 		for (var y = 0; y < gridHeight; y++) {
-			gridNext[x][y]=storage[x][y]==3?1:(storage[x][y]==2?grid[x][y]:0);
+			grid[x][y]=storage[x][y]==3?1:(storage[x][y]==2?grid[x][y]:0);
 			storage[x][y]=0;
 		}
 	}
@@ -75,24 +63,24 @@ function fillNext(){
 
 // game update
 function update(dt) {
+	
+	// draw result
+	draw();	
 	// iterate simulation rules
 	life();
 
-	// draw result
-	draw();
+	
 }
 
 function draw() {
 // clear canvas
 	ctx.fillStyle = '#fee';
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
-
+	ctx.fillStyle = "#ee66aa";
 	for (var x = 0; x < gridWidth; x++) {
-		for (var y = 0; y < gridHeight; y++) {
-
-			if (grid[x][y] == 1) {
-				ctx.fillStyle = "#ee66aa";
-				ctx.fillRect(x * gridSquareWidth, y * gridSquareWidth, gridSquareWidth, gridSquareWidth);
+		for (var y = 0; y < gridHeight; y++) {		
+			if (grid[x][y]) {				
+				ctx.fillRect(x, y, 1,1);
 			}
 		}
 	}
@@ -108,9 +96,10 @@ function gameLoop() {
     update(dt);
 
     lastTime = now;
-	window.setTimeout(gameLoop, 1);
+	window.setTimeout(gameLoop);
 };
 
 
 // start game
+
 gameLoop();
