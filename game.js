@@ -1,7 +1,9 @@
 // setup canvas
 var canvas = document.getElementById('gameCanvas');
 var ctx=canvas.getContext('2d');
-
+//setup display of generation count
+var idgen = document.getElementById('generation');
+var gen=0;
 // canvas and grid size defaults
 var gridWidth = 1300;
 var gridHeight = 600;
@@ -14,27 +16,28 @@ canvas.style.height = canvas.height;
 
 var grid = [];
 var storage=[];
+var alivetab=[];
+var alivei=0;
+//alivetab stores coordinates of every cell that is alive.
+//alivei - both iterates through the alivetab and indicates the position of a (last+1) living cell
 
-// create default grid array
-// sudo random noise
+// create default grid array - grid filled in approx. 15% with randomly put cells + get coords of alive cells
 
 for (var x = 0; x < gridWidth; x++) {
 	grid[x] = [];
 	storage[x]=[];
 	for (var y = 0; y < gridHeight; y++) {
 		grid[x][y] = Math.round(Math.random()-0.35);
-		storage[x][y]=0;		
+		storage[x][y]=0;
+		if (grid[x][y]) alivetab[alivei++]=x*gridWidth+y;	
 	}
 }
 
 // life init grid
 function life(){
 	// touch each grid coord
-	for (var x = 0; x < gridWidth; x++) {
-		for (var y = 0; y < gridHeight; y++) {
-			if(Boolean(grid[x][y])) addNearby(x,y);			
-		}
-	}
+	for (var x = 0; x < alivei; x++) addNearby(Math.round((alivetab[x]/gridWidth)-0.5),alivetab[x]%gridWidth);
+	alivei=0;
 	fillNext();
 }
 
@@ -50,11 +53,12 @@ function addNearby(x,y){
 	storage[(i+2)%gridWidth][y]+=1;
 	storage[(i+2)%gridWidth][(j+2)%gridHeight]+=1;
 }
-//Change the current grid according to neighbor count for each cell + refresh the storage
+//Change the current grid according to neighbor count for each cell + store coords of alive cell + refresh the storage
 function fillNext(){
 	for (var x = 0; x < gridWidth; x++) {
 		for (var y = 0; y < gridHeight; y++) {
 			grid[x][y]=storage[x][y]==3?1:(storage[x][y]==2?grid[x][y]:0);
+			if (grid[x][y]) alivetab[alivei++]=x*gridWidth+y;
 			storage[x][y]=0;
 		}
 	}
@@ -68,21 +72,21 @@ function update(dt) {
 	draw();	
 	// iterate simulation rules
 	life();
-
+	//indicate generation count
+	idgen.innerHTML="Generation: "+gen;
+	gen++
 	
 }
 
 function draw() {
 // clear canvas
-	ctx.fillStyle = '#fee';
+	ctx.clearRect(0, 0, canvas.width, canvas.height); //it appears to be easier for the browser once done this way
+	ctx.fillStyle = '#fee';	
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
 	ctx.fillStyle = "#ee66aa";
-	for (var x = 0; x < gridWidth; x++) {
-		for (var y = 0; y < gridHeight; y++) {		
-			if (grid[x][y]) {				
-				ctx.fillRect(x, y, 1,1);
-			}
-		}
+	for (var x = 0; x < alivei; x++) {			
+				ctx.fillRect(Math.round((alivetab[x]/gridWidth)-0.5), alivetab[x]%gridWidth, 1,1);
+			
 	}
 }
 

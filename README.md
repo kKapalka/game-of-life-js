@@ -3,6 +3,13 @@ An implementation of Conway's Game of Life using Javascript and the html5 Canvas
 
 Based on an implementation made by: [benbyford.com](http://benbyford.com/experiments/conways-game-of-life-in-javascript/)
 
+Version 1.5:
+	-Another algorithm change: applied a new array and its iterator, which run through all alive cells
+	of the grid and indicate the position of last alive cell. Using them instead in the draw() function
+	results in a substantial improvement in efficiency.
+	-Added a generation counter on the bottom of the screen
+	-Other minor optimization tweaks
+
 Version 1.4:
 	-Further adjustments resulting in another framerate leap, to 15.86
 
